@@ -1,5 +1,4 @@
 h2o_wave
 h2ogpte
 loguru
-pytest
 toml
