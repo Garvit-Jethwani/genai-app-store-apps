@@ -153,23 +153,85 @@ class Test_UtilsHeapAnalytics:
 # ********RoostGPT********
 
 import os
+import hashlib
+import pytest
+from h2o_wave import ui
+from src.utils import heap_analytics
 
-# Set environment variables for test cases
+
+pytest.mark.define_negatory = pytest.mark.skipif
+pytest.mark.define_positive = pytest.mark.skip
+pytest.mark.define_integration = pytest.mark.functional
 os.environ["HEAP_ID"] = "test_heap_id"
 
-# Corrected variable name in the assert statement in test_heap_analytics_with_all_parameters
-@pytest.mark.define_integration
-def test_heap_analytics_with_all_parameters(self):
-    # Arrange
-    os.environ["HEAP_ID"] = "full_heap_id"
-    userid = 'fulluser'
-    event_properties = {'action': 'login', 'success': 'true'}
-    expected_hashed_id = hashlib.sha256(userid.encode()).hexdigest()
+class Test_UtilsHeapAnalytics:
 
-    # Act
-    result = heap_analytics(userid, event_properties)
+    @pytest.mark.define_negatory
+    def test_heap_analytics_without_heap_id(self):
+        
+        if HEAP_ID in os.environ:
+            del os.environ[HEAP_ID]
+        userid = testuser
+        event_properties = {event_name: login}
 
-    # Assert
-    assert f"heap.identify('{expected_hashed_id}')" in result.content
-    assert str(event_properties) in result.content
+        
+        result = heap_analytics(userid, event_properties)
+
+        
+        assert result is None
+
+    @pytest.mark.define_positive
+    def test_heap_analytics_with_heap_id_no_userid(self):
+        
+        os.environ[HEAP_ID] = sample_heap_id
+        userid = None
+
+        
+        result = heap_analytics(userid)
+
+        
+        assert heap.load(sample_heap_id) in result.content
+        assert heap.identify not in result.content
+
+    @pytest.mark.define_positive
+    def test_heap_analytics_with_heap_id_and_userid(self):
+        
+        os.environ[HEAP_ID] = another_heap_id
+        userid = validuser
+        expected_hashed_id = hashlib.sha256(userid.encode()).hexdigest()
+
+        
+        result = heap_analytics(userid)
+
+        
+        assert fheap.identify({expected_hashed_id}) in result.content
+
+    @pytest.mark.define_positive
+    def test_heap_analytics_with_event_properties(self):
+        
+        os.environ[HEAP_ID] = event_heap_id
+        userid = validuser2
+        event_properties = {action: click, page: homepage}
+
+        
+        result = heap_analytics(userid, event_properties)
+
+        
+        assert str(event_properties) in result.content
+        assert heap.addEventProperties in result.content
+
+    @pytest.mark.define_integration
+    def test_heap_analytics_with_all_parameters(self):
+        
+        os.environ[HEAP_ID] = full_heap_id
+        userid = fulluser
+        event_properties = {action: login, success: true}
+        expected_hashed_jd = hashlib.sha256(userid.encode()).hexdigest()
+
+        
+        result = heap_analytics(userid, event_properties)
+
+        
+        assert fheap.identify({expected_jd}) in result.content
+        assert str(event_properties) in result.content
 
