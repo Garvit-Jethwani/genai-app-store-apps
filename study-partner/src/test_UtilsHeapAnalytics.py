@@ -148,6 +148,8 @@ class Test_UtilsHeapAnalytics:
         assert fheap.identify({expected_jd}) in result.content
         assert str(event_properties) in result.content
 "
+
+roost_feedback [5/31/2024, 11:31:31 AM]:Add more comments to the test
 """
 
 # ********RoostGPT********
@@ -162,76 +164,78 @@ from src.utils import heap_analytics
 pytest.mark.define_negatory = pytest.mark.skipif
 pytest.mark.define_positive = pytest.mark.skip
 pytest.mark.define_integration = pytest.mark.functional
+
+# Set environment variable for HEAP_ID for appropriate assertions in tests
 os.environ["HEAP_ID"] = "test_heap_id"
 
 class Test_UtilsHeapAnalytics:
-
+    # This test ensures that no analytics tracking is conducted without a proper HEAP_ID
     @pytest.mark.define_negatory
     def test_heap_analytics_without_heap_id(self):
-        
-        if HEAP_ID in os.environ:
-            del os.environ[HEAP_ID]
-        userid = testuser
-        event_properties = {event_name: login}
+        # Remove HEAP_ID to simulate the environment variable being unset
+        if "HEAP_ID" in os.environ:
+            del os.environ["HEAP_ID"]
+        userid = 'testuser'
+        event_properties = {'event_name': 'login'}
 
-        
+        # Call function to simulate analytics tracking without HEAP_ID
         result = heap_analytics(userid, event_properties)
 
-        
+        # The expected result is None because HEAP_ID is critical for function execution
         assert result is None
 
+    # This test validates that the script initializes correctly even when no userid is provided    
     @pytest.mark.define_positive
     def test_heap_analytics_with_heap_id_no_userid(self):
-        
-        os.environ[HEAP_ID] = sample_heap_id
+        os.environ["HEAP_ID"] = "sample_heap_id"
         userid = None
 
-        
+        # Call function to simulate analytics tracking with HEAP_ID but no userid
         result = heap_analytics(userid)
 
-        
-        assert heap.load(sample_heap_id) in result.content
-        assert heap.identify not in result.content
+        # Ensure the script includes initialization for Heap but no user identification
+        assert "heap.load('sample_heap_id')" in result.content
+        assert "heap.identify" not in result.content
 
+    # This test checks the initiation of analytics tracking with both HEAP_ID and valid userid
     @pytest.mark.define_positive
     def test_heap_analytics_with_heap_id_and_userid(self):
-        
-        os.environ[HEAP_ID] = another_heap_id
-        userid = validuser
+        os.environ["HEAP_ID"] = "another_heap_id"
+        userid = 'validuser'
         expected_hashed_id = hashlib.sha256(userid.encode()).hexdigest()
 
-        
+        # Call the modified heap_analytics function
         result = heap_analytics(userid)
 
-        
-        assert fheap.identify({expected_hashed_id}) in result.content
+        # The identification number should be hashed and included in the script
+        assert f"heap.identify('{expected_hashed_id}')" in result.content
 
+    # Verify that event properties are correctly added to the analytics script
     @pytest.mark.define_positive
     def test_heap_analytics_with_event_properties(self):
-        
-        os.environ[HEAP_ID] = event_heap_id
-        userid = validuser2
-        event_properties = {action: click, page: homepage}
+        os.environ["HEAP_ID"] = "event_heap_id"
+        userid = 'validuser2'
+        event_properties = {'action': 'click', 'page': 'homepage'}
 
-        
-        result = heap_analytics(userid, event_properties)
+        # Call the function with additional event properties
+        result = heap_analytic(userid, event_properties)
 
-        
+        # Assert the inclusion of event properties in the script
         assert str(event_properties) in result.content
-        assert heap.addEventProperties in result.content
+        assert "heap.addEventProperties" in result.content
 
+    # Comprehensive test assessing full functionality with all parameters provided
     @pytest.mark.define_integration
     def test_heap_analytics_with_all_parameters(self):
-        
-        os.environ[HEAP_ID] = full_heap_id
-        userid = fulluser
-        event_properties = {action: login, success: true}
+        os.environ["HEAP_ID"] = "full_heap_id"
+        userid = 'fulluser'
+        event_properties = {'action': 'login', 'success': True}
         expected_hashed_jd = hashlib.sha256(userid.encode()).hexdigest()
 
-        
+        # Simulate analytics tracking with full settings
         result = heap_analytics(userid, event_properties)
 
-        
-        assert fheap.identify({expected_jd}) in result.content
+        # Evaluate the integration of both user ID and event properties in the script
+        assert f"heap.identify('{expected_jd}')" in result.content
         assert str(event_properties) in result.content
 
